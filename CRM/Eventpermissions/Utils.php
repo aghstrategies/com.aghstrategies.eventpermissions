@@ -102,7 +102,7 @@ class CRM_Eventpermissions_Utils {
     if (empty($hostID)) {
       $hostID = 0;
     }
-    $query = "SELECT e.id, e.title
+    $query = "SELECT e.id, e.title, e.participant_listing_id
       FROM civicrm_event e
       LEFT JOIN civicrm_participant p
         ON p.event_id = e.id
@@ -113,7 +113,10 @@ class CRM_Eventpermissions_Utils {
     $events = CRM_Core_DAO::executeQuery($query);
     $return = array();
     while ($events->fetch()) {
-      $return[$events->id] = $events->title;
+      $return[$events->id] = array(
+        'title' => $events->title,
+        'participant_listing_id' => $events->participant_listing_id,
+      );
     }
     return $return;
   }
