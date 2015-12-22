@@ -5,6 +5,36 @@
  */
 class CRM_Eventpermissions_Utils {
   /**
+   * The participant_role_id with the permission to edit an event.
+   *
+   * @type int
+   */
+  private $hostId = NULL;
+
+  // TODO: Get role better than this.
+  public function getHostId() {
+    if (empty($this->hostId)) {
+      try {
+        $result = civicrm_api3('Participant', 'getoptions', array('field' => "participant_role_id"));
+        foreach ($result['values'] as $k => $v) {
+          if (strtolower($v) == 'host') {
+            $this->hostId = $k;
+            break;
+          }
+        }
+      }
+      catch (CiviCRM_API3_Exception $e) {
+        $error = $e->getMessage();
+        CRM_Core_Error::debug_log_message(ts('API Error finding ID of "host" participant role: %1', array(
+          'domain' => 'com.aghstrategies.eventpermissions',
+          1 => $error,
+        )));
+      }
+    }
+    return $this->hostId;
+  }
+
+  /**
    * See if the current user can edit an event.
    *
    * @param int $eventId
@@ -63,6 +93,29 @@ class CRM_Eventpermissions_Utils {
       )));
     }
     return FALSE;
+  }
+
+  public function myUpcomingEvents() {
+    $contactId = CRM_Core_Session::singleton()->get('userID');
+    $curDate = date('YmdHis');
+    $hostID = $this->getHostId();
+    if (empty($hostID)) {
+      $hostID = 0;
+    }
+    $query = "SELECT e.id, e.title
+      FROM civicrm_event e
+      LEFT JOIN civicrm_participant p
+        ON p.event_id = e.id
+        AND p.role_id = {$hostID}
+        AND p.contact_id = {$contactId}
+      WHERE (e.end_date >= {$curDate} OR e.end_date IS NULL)
+        AND (e.created_id = {$contactId} OR p.id IS NOT NULL)";
+    $events = CRM_Core_DAO::executeQuery($query);
+    $return = array();
+    while ($events->fetch()) {
+      $return[$events->id] = $events->title;
+    }
+    return $return;
   }
 
 }

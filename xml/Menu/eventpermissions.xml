@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/dashlet/myEvents</path>
+    <page_callback>CRM_Eventpermissions_Page_MyEvents</page_callback>
+    <title>My Events</title>
+    <access_arguments>access CiviEvent</access_arguments>
+  </item>
+</menu>
