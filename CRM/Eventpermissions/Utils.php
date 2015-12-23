@@ -5,35 +5,57 @@
  */
 class CRM_Eventpermissions_Utils {
   /**
-   * The participant_role_id with the permission to edit an event.
+   * The participant_role_id values with the permission to edit an event.
    *
-   * @type int
+   * @type array
    */
-  private $hostId = NULL;
+  private $hostId = array();
 
   private static $dashletId = NULL;
 
-  // TODO: Get role better than this.
   public function getHostId() {
     if (empty($this->hostId)) {
       try {
-        $result = civicrm_api3('Participant', 'getoptions', array('field' => "participant_role_id"));
-        foreach ($result['values'] as $k => $v) {
-          if (strtolower($v) == 'host') {
-            $this->hostId = $k;
-            break;
-          }
+        $result = civicrm_api3('Setting', 'getvalue', array(
+          'name' => 'eventpermissions_roles',
+          'group' => 'Event Permissions Preferences',
+        ));
+        if (!empty($result)) {
+          $this->hostId = $result;
         }
       }
       catch (CiviCRM_API3_Exception $e) {
         $error = $e->getMessage();
-        CRM_Core_Error::debug_log_message(ts('API Error finding ID of "host" participant role: %1', array(
+        CRM_Core_Error::debug_log_message(ts('API Error finding ID of permissioned participant role(s): %1', array(
           'domain' => 'com.aghstrategies.eventpermissions',
           1 => $error,
         )));
       }
     }
     return $this->hostId;
+  }
+
+  /**
+   * Set the participant role(s) with the permission to edit events.
+   */
+  public function setHostId($ids) {
+    if (empty($ids)) {
+      $ids = array();
+    }
+    elseif (!is_array($ids)) {
+      $ids = array(intval($ids));
+    }
+    try {
+      $result = civicrm_api3('Setting', 'create', array('eventpermissions_roles' => $ids));
+      $this->hostId = $ids;
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      $error = $e->getMessage();
+      CRM_Core_Error::debug_log_message(ts('API Error setting permissioned participant roles: %1', array(
+        'domain' => 'com.aghstrategies.eventpermissions',
+        1 => $error,
+      )));
+    }
   }
 
   /**
@@ -131,16 +153,23 @@ class CRM_Eventpermissions_Utils {
     $curDate = date('YmdHis');
     $hostID = $this->getHostId();
     if (empty($hostID)) {
-      $hostID = 0;
+      $join = '';
+      $andWhere = '';
+    }
+    else {
+      $hostID = implode(', ', $hostID);
+      $join = "
+      LEFT JOIN civicrm_participant p
+        ON p.event_id = e.id
+        AND p.role_id IN ({$hostID})
+        AND p.contact_id = {$contactId}";
+      $andWhere = ' OR p.id IS NOT NULL';
     }
     $query = "SELECT e.id, e.title, e.participant_listing_id
       FROM civicrm_event e
-      LEFT JOIN civicrm_participant p
-        ON p.event_id = e.id
-        AND p.role_id = {$hostID}
-        AND p.contact_id = {$contactId}
+      {$join}
       WHERE (e.end_date >= {$curDate} OR e.end_date IS NULL)
-        AND (e.created_id = {$contactId} OR p.id IS NOT NULL)";
+        AND (e.created_id = {$contactId}{$andWhere})";
     $events = CRM_Core_DAO::executeQuery($query);
     $return = array();
     while ($events->fetch()) {

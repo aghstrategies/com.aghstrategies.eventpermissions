@@ -6,4 +6,10 @@
     <title>My Events</title>
     <access_arguments>access CiviEvent</access_arguments>
   </item>
+  <item>
+    <path>civicrm/eventpermissions</path>
+    <page_callback>CRM_Eventpermissions_Form_Admin</page_callback>
+    <title>Administer Event Permissions</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>
