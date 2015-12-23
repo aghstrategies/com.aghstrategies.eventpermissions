@@ -41,6 +41,17 @@ function eventpermissions_civicrm_preProcess($formName, &$form) {
 }
 
 /**
+ * Implements hook_civicrm_pageRun().
+ */
+function eventpermissions_civicrm_pageRun(&$page) {
+  if ($page->getVar('_name') == 'CRM_Contact_Page_DashBoard') {
+    $dashId = CRM_Eventpermissions_Utils::getDashletId();
+    $resources = CRM_Core_Resources::singleton();
+    $resources->addVars('eventPermissions', array('dashletId' => "#widget-$dashId"));
+  }
+}
+
+/**
  * Implements hook_civicrm_config().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config

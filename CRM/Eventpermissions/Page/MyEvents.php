@@ -2,7 +2,17 @@
 
 require_once 'CRM/Core/Page.php';
 
+/**
+ * My Events widget.
+ *
+ * This sets up the widget for listing events where you are the owner or the
+ * "host".  That is, these are the events that you can edit even if you don't
+ * have the "edit all events" permission.
+ */
 class CRM_Eventpermissions_Page_MyEvents extends CRM_Core_Page {
+  /**
+   * Basic page run function.
+   */
   public function run() {
     // Get link options for managing events.
     $enableCart = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::EVENT_PREFERENCES_NAME,
@@ -107,4 +117,5 @@ class CRM_Eventpermissions_Page_MyEvents extends CRM_Core_Page {
 
     parent::run();
   }
+
 }
