@@ -1,6 +1,6 @@
 <p>{ts domain="com.aghstrategies.eventpermissions"}Event Permissions restricts event management to the following users (who must also have "Access CiviCRM" and "Access CiviEvent" permissions):{/ts}</p>
 <ul>
-  <li>{ts domain="com.aghstrategies.eventpermissions"}users with the "Administer CiviCRM" permission,{/ts}</li>
+  <li>{ts domain="com.aghstrategies.eventpermissions"}users with the "Edit all events" permission,{/ts}</li>
   <li>{ts domain="com.aghstrategies.eventpermissions"}the user who created an event, or{/ts}</li>
   <li>{ts domain="com.aghstrategies.eventpermissions"}users registered for the event with one of the roles selected here.{/ts}</li>
 </ul>

@@ -9,7 +9,12 @@ function eventpermissions_civicrm_permission(&$permissions) {
   $permissions += array(
     'edit all events' => array(
       ts('Edit all events', array('domain' => 'com.aghstrategies.eventpermissions')),
-      ts('Without this permission, users with Access CiviEvent may only edit events they created or where they are registered as Host.', array('domain' => 'com.aghstrategies.civimonitor')),
+      ts('Without this permission, users with Access CiviEvent may only edit events they created or where they are registered with a role defined on the <a href="%1">Administer Event Permissions</a> page.',
+        array(
+          'domain' => 'com.aghstrategies.civimonitor',
+          1 => CRM_Utils_System::url('civicrm/eventpermissions', 'reset=1'),
+        )
+      ),
     ),
   );
 }
@@ -48,6 +53,47 @@ function eventpermissions_civicrm_pageRun(&$page) {
     $dashId = CRM_Eventpermissions_Utils::getDashletId();
     $resources = CRM_Core_Resources::singleton();
     $resources->addVars('eventPermissions', array('dashletId' => "#widget-$dashId"));
+  }
+}
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ */
+function eventpermissions_civicrm_navigationMenu(&$params) {
+  $searchParams = array('url' => 'civicrm/eventpermissions?reset=1');
+  $menuItems = array();
+  CRM_Core_BAO_Navigation::retrieve($searchParams, $menuItems);
+  if (!empty($menuItems)) {
+    return;
+  }
+  $searchParams = array('url' => 'civicrm/admin/options/participant_role?reset=1');
+  $menuItems = array();
+  CRM_Core_BAO_Navigation::retrieve($searchParams, $menuItems);
+  $parent = CRM_Utils_Array::value('parent_id', $menuItems);
+
+  $navId = CRM_Core_DAO::singleValueQuery("SELECT max(id) FROM civicrm_navigation");
+  if (is_int($navId)) {
+    $navId++;
+  }
+
+  $basicAttrs = array(
+    'label' => ts('Event Permissions', array('domain' => 'com.aghstrategies.eventpermissions')),
+    'name' => 'Event Permissions',
+    'url' => 'civicrm/eventpermissions?reset=1',
+    'permission' => 'administer CiviCRM',
+    'active' => 1,
+    'navID' => $navId,
+    'parentID' => $parent,
+  );
+
+  $searchParams = array('id' => $parent);
+  $menuItems = array();
+  CRM_Core_BAO_Navigation::retrieve($searchParams, $menuItems);
+  if (empty($menuItems['parent_id'])) {
+    $params[$parent]['child'][$navId] = $basicAttrs;
+  }
+  else {
+    $params[$menuItems['parent_id']]['child'][$parent]['child'][$navId] = array('attributes' => $basicAttrs);
   }
 }
 
