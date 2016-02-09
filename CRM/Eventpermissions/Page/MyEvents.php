@@ -79,9 +79,8 @@ class CRM_Eventpermissions_Page_MyEvents extends CRM_Core_Page {
       ),
     );
 
-    $utils = new CRM_Eventpermissions_Utils();
     $events = array();
-    foreach ($utils->myUpcomingEvents() as $id => $event) {
+    foreach (CRM_Eventpermissions_Utils::myUpcomingEvents() as $id => $event) {
       $events[] = array(
         'title' => CRM_Utils_System::href($event['title'], 'civicrm/event/info', "id=$id&reset=1"),
         'links' => CRM_Core_Action::formLink($tabs,

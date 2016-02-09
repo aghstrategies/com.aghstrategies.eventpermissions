@@ -36,14 +36,12 @@ class CRM_Eventpermissions_Form_Admin extends CRM_Core_Form {
   }
 
   public function setDefaultValues() {
-    $utils = new CRM_Eventpermissions_Utils();
-    return array('permission_role' => $utils->getHostId());
+    return array('permission_role' => CRM_Eventpermissions_Utils::getHostId());
   }
 
   public function postProcess() {
     $values = $this->exportValues();
-    $utils = new CRM_Eventpermissions_Utils();
-    $utils->setHostId($values['permission_role']);
+    CRM_Eventpermissions_Utils::setHostId($values['permission_role']);
     CRM_Core_Session::setStatus(ts('Permissioned role(s) updated.', array(
       'domain' => 'com.aghstrategies.eventpermissions',
     )));

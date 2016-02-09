@@ -39,12 +39,11 @@ function eventpermissions_civicrm_aclGroup($type, $contactID, $tableName, &$allG
   }
   // get events where contact is host
   try {
-    $utils = new CRM_Eventpermissions_Utils();
     $result = civicrm_api3('Participant', 'get', array(
       'sequential' => 1,
       'return' => "event_id",
       'contact_id' => $contactID,
-      'role_id' => array('IN' => $utils->getHostId()),
+      'role_id' => array('IN' => CRM_Eventpermissions_Utils::getHostId()),
       'options' => array('limit' => 0),
     ));
     foreach ($result['values'] as $participant) {

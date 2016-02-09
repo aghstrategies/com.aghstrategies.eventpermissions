@@ -9,19 +9,19 @@ class CRM_Eventpermissions_Utils {
    *
    * @type array
    */
-  private $hostId = array();
+  private static $hostId = array();
 
   private static $dashletId = NULL;
 
-  public function getHostId() {
-    if (empty($this->hostId)) {
+  public static function getHostId() {
+    if (empty(self::$hostId)) {
       try {
         $result = civicrm_api3('Setting', 'getvalue', array(
           'name' => 'eventpermissions_roles',
           'group' => 'Event Permissions Preferences',
         ));
         if (!empty($result)) {
-          $this->hostId = $result;
+          self::$hostId = $result;
         }
       }
       catch (CiviCRM_API3_Exception $e) {
@@ -32,13 +32,13 @@ class CRM_Eventpermissions_Utils {
         )));
       }
     }
-    return $this->hostId;
+    return self::$hostId;
   }
 
   /**
    * Set the participant role(s) with the permission to edit events.
    */
-  public function setHostId($ids) {
+  public static function setHostId($ids) {
     if (empty($ids)) {
       $ids = array();
     }
@@ -47,7 +47,7 @@ class CRM_Eventpermissions_Utils {
     }
     try {
       $result = civicrm_api3('Setting', 'create', array('eventpermissions_roles' => $ids));
-      $this->hostId = $ids;
+      self::$hostId = $ids;
     }
     catch (CiviCRM_API3_Exception $e) {
       $error = $e->getMessage();
@@ -148,10 +148,10 @@ class CRM_Eventpermissions_Utils {
     return FALSE;
   }
 
-  public function myUpcomingEvents() {
+  public static function myUpcomingEvents() {
     $contactId = CRM_Core_Session::singleton()->get('userID');
     $curDate = date('YmdHis');
-    $hostID = $this->getHostId();
+    $hostID = self::getHostId();
     if (empty($hostID)) {
       $join = '';
       $andWhere = '';
