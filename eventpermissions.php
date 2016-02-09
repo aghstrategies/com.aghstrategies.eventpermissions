@@ -6,43 +6,14 @@ require_once 'eventpermissions.civix.php';
  * Implements hook_civicrm_permission().
  */
 function eventpermissions_civicrm_permission(&$permissions) {
-  $permissions += array(
-    'edit all events' => array(
-      ts('Edit all events', array('domain' => 'com.aghstrategies.eventpermissions')),
-      ts('Without this permission, users with Access CiviEvent may only edit events they created or where they are registered with a role defined on the <a href="%1">Administer Event Permissions</a> page.',
-        array(
-          'domain' => 'com.aghstrategies.civimonitor',
-          1 => CRM_Utils_System::url('civicrm/eventpermissions', 'reset=1'),
-        )
-      ),
-    ),
-  );
-}
-
-/**
- * Implements hook_civicrm_preProcess().
- *
- * Note: the event "edit" ACL actually governs the ability to register for an
- * event, so it isn't applicable here.  Instead, you can manually grant access
- * to manage an event by making someone registered as "host".
- */
-function eventpermissions_civicrm_preProcess($formName, &$form) {
-  switch ($formName) {
-    case 'CRM_Event_Form_ManageEvent_EventInfo':
-    case 'CRM_Event_Form_ManageEvent_Location':
-    case 'CRM_Event_Form_ManageEvent_Fee':
-    case 'CRM_Event_Form_ManageEvent_Registration':
-    case 'CRM_Friend_Form_Event':
-    case 'CRM_Event_Form_ManageEvent_ScheduleReminders':
-    case 'CRM_Event_Form_ManageEvent_Repeat':
-    case 'CRM_Event_Form_ManageEvent_Conference':
-      $check = CRM_Eventpermissions_Utils::checkPerms($form->_id);
-      if ($check === FALSE) {
-        // Deny access.
-        CRM_Core_Error::statusBounce(ts('You do not have access to edit this event (ID: %1).', array(1 => $form->_id, 'domain' => 'com.aghstrategies.eventpermissions')));
-      }
-      break;
-  }
+  $permissions['edit all events'][1] = implode(' ', array(
+    $permissions['edit all events'][1],
+    ts('Without this permission, users with Access CiviEvent may only edit events they created or where they are registered with a role defined on the <a href="%1">Administer Event Permissions</a> page.',
+    array(
+      'domain' => 'com.aghstrategies.civimonitor',
+      1 => CRM_Utils_System::url('civicrm/eventpermissions', 'reset=1'),
+    )
+  ));
 }
 
 /**
@@ -53,6 +24,40 @@ function eventpermissions_civicrm_pageRun(&$page) {
     $dashId = CRM_Eventpermissions_Utils::getDashletId();
     $resources = CRM_Core_Resources::singleton();
     $resources->addVars('eventPermissions', array('dashletId' => "#widget-$dashId"));
+  }
+}
+
+/**
+ * Implements hook_civicrm_aclGroup().
+ */
+function eventpermissions_civicrm_aclGroup($type, $contactID, $tableName, &$allGroups, &$currentGroups) {
+  // Filter out other types of ACL checks
+  if ($type != CRM_Core_Permission::EDIT || $tableName != 'civicrm_event') {
+    return;
+  }
+  // get events where contact is host
+  try {
+    $utils = new CRM_Eventpermissions_Utils();
+    return array('permission_role' => $utils->getHostId());
+    $result = civicrm_api3('Participant', 'get', array(
+      'sequential' => 1,
+      'return' => "event_id",
+      'contact_id' => $contactID,
+      'role_id' => array('IN' => $utils->getHostId()),
+      'options' => array('limit' => 0),
+    ));
+    foreach ($result['values'] as $participant) {
+      if (!in_array($participant['event_id'], $currentGroups)) {
+        $currentGroups[] = $participant['event_id'];
+      }
+    }
+  }
+  catch (CiviCRM_API3_Exception $e) {
+    $error = $e->getMessage();
+    CRM_Core_Error::debug_log_message(ts('API Error finding event owner: %1', array(
+      'domain' => 'com.aghstrategies.eventpermissions',
+      1 => $error,
+    )));
   }
 }
 
