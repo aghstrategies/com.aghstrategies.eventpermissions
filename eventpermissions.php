@@ -33,13 +33,13 @@ function eventpermissions_civicrm_pageRun(&$page) {
  */
 function eventpermissions_civicrm_aclGroup($type, $contactID, $tableName, &$allGroups, &$currentGroups) {
   // Filter out other types of ACL checks
-  if ($type != CRM_Core_Permission::EDIT || $tableName != 'civicrm_event') {
+  if (($type != CRM_Core_Permission::EDIT && $type != CRM_Core_Permission::VIEW)
+    || $tableName != 'civicrm_event') {
     return;
   }
   // get events where contact is host
   try {
     $utils = new CRM_Eventpermissions_Utils();
-    return array('permission_role' => $utils->getHostId());
     $result = civicrm_api3('Participant', 'get', array(
       'sequential' => 1,
       'return' => "event_id",
