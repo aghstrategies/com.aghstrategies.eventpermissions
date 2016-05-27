@@ -98,6 +98,23 @@ function eventpermissions_civicrm_navigationMenu(&$params) {
 }
 
 /**
+ * Implements hook_civicrm_copy().
+ *
+ * Sets the "created_id" to the current contact.
+ */
+function eventpermissions_civicrm_copy($objectName, &$object) {
+  if ($objectName != 'Event') {
+    return;
+  }
+  $contactId = CRM_Core_Session::singleton()->get('userID');
+  if (empty($contactId)) {
+    return;
+  }
+  $object->created_id = $contactId;
+  $object->save();
+}
+
+/**
  * Implements hook_civicrm_config().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
