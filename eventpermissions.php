@@ -11,7 +11,7 @@ function eventpermissions_civicrm_permission(&$permissions) {
       ts('Edit all events', array('domain' => 'com.aghstrategies.eventpermissions')),
       ts('Without this permission, users with Access CiviEvent may only edit events they created or where they are registered with a role defined on the <a href="%1">Administer Event Permissions</a> page.',
         array(
-          'domain' => 'com.aghstrategies.civimonitor',
+          'domain' => 'com.aghstrategies.eventpermissions',
           1 => CRM_Utils_System::url('civicrm/eventpermissions', 'reset=1'),
         )
       ),

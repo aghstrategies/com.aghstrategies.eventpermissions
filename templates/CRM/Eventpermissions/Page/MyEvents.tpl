@@ -7,10 +7,10 @@
 {/foreach}
 </table>
 <div class="copy_event-section">
-  Copy an event: <input name="copy_event" placeholder="{ts}- select event to copy -{/ts}"/>
+  Copy an event: <input name="copy_event" placeholder="{ts domain="com.aghstrategies.eventpermissions"}- select event to copy -{/ts}"/>
 </div>
 
-<div class="description">{ts}Recently created or copied events will not appear in this listing until you click "Refresh Dashboard Data"{/ts}</div>
+<div class="description">{ts domain="com.aghstrategies.eventpermissions"}Recently created or copied events will not appear in this listing until you click "Refresh Dashboard Data"{/ts}</div>
 
 {* Script included in template because widgets don't allow for adding things to
 the html-header region. *}
