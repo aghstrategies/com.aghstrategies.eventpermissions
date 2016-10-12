@@ -20,6 +20,15 @@ function eventpermissions_civicrm_permission(&$permissions) {
 }
 
 /**
+ * Implements hook_civicrm_permission_check().
+ */
+function eventpermissions_civicrm_permission_check($permission, &$granted) {
+  if ($permission == 'edit all events' && !$granted && $_REQUEST['component'] == 'event') {
+    $eventId = $_REQUEST['id'];
+    $granted = CRM_Eventpermissions_Utils::isMyEvent($eventId);
+  }
+}
+/**
  * Implements hook_civicrm_preProcess().
  *
  * Note: the event "edit" ACL actually governs the ability to register for an

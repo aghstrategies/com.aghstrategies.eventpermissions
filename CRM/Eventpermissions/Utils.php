@@ -105,7 +105,19 @@ class CRM_Eventpermissions_Utils {
     if (!$eventId) {
       return NULL;
     }
+    return self::isMyEvent($eventId);
+  }
 
+  /**
+   * Checks to see if user created or is host of event
+   *
+   * @param  int $eventId
+   *   Id of event for which we are checking permissions
+   *
+   * @return bool
+   *   user created or is a host
+   */
+  public static function isMyEvent($eventId) {
     $contactId = CRM_Core_Session::singleton()->get('userID');
 
     // Creators of events can edit their events.
